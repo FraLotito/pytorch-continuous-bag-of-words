@@ -18,12 +18,6 @@ def get_index_of_max(input):
 def get_max_prob_result(input, ix_to_word):
     return ix_to_word[get_index_of_max(input)]
 
-def get_similarity(w1, w2, model):
-    e1 = model.get_word_emdedding(w1)
-    e2 = model.get_word_emdedding(w2)
-    return (e1.dot(e2) / (torch.norm(e1) * torch.norm(e2))).data.numpy()[0]
-
-
 
 CONTEXT_SIZE = 2  # 2 words to the left, 2 to the right
 EMDEDDING_DIM = 100
@@ -71,7 +65,7 @@ class CBOW(torch.nn.Module):
         #out: 1 x vocab_size
         self.linear2 = nn.Linear(128, vocab_size)
 
-        self.activation_function2 = nn.LogSoftmax()
+        self.activation_function2 = nn.LogSoftmax(dim = -1)
         
 
     def forward(self, inputs):
@@ -108,14 +102,13 @@ for epoch in range(50):
         total_loss += loss.data
 
 # ====================== TEST
-
-context_vector = make_context_vector(['People','create','to', 'direct'], word_to_ix)
+context = ['People','create','to', 'direct']
+context_vector = make_context_vector(context, word_to_ix)
 a = model(context_vector).data.numpy()
-print('Prediction = {}'.format(get_max_prob_result(a[0], ix_to_word)))
+print('Raw text: {}\n'.format(' '.join(raw_text)))
+print('Context: {}\n'.format(context))
+print('Prediction: {}'.format(get_max_prob_result(a[0], ix_to_word)))
 
-# ====================== SIMILARITY
-
-print('Similarity: {}'.format(get_similarity('idea', 'process', model)))
 
 
 
