@@ -1,12 +1,10 @@
 import torch
-from torch.autograd import Variable
 import torch.nn as nn
 import numpy as np
 
 def make_context_vector(context, word_to_ix):
     idxs = [word_to_ix[w] for w in context]
-    tensor = torch.LongTensor(idxs)
-    return Variable(tensor)
+    return torch.tensor(idxs, dtype=torch.long)
 
 def get_index_of_max(input):
     index = 0
@@ -77,7 +75,7 @@ class CBOW(torch.nn.Module):
         return out
 
     def get_word_emdedding(self, word):
-        word = Variable(torch.LongTensor([word_to_ix[word]]))
+        word = torch.LongTensor([word_to_ix[word]])
         return self.embeddings(word).view(1,-1)
 
 
@@ -94,8 +92,7 @@ for epoch in range(50):
         context_vector = make_context_vector(context, word_to_ix)  
         model.zero_grad()
         log_probs = model(context_vector)
-        loss = loss_function(log_probs, Variable(
-            torch.LongTensor([word_to_ix[target]])))
+        loss = loss_function(log_probs, torch.tensor([word_to_ix[target]], dtype=torch.long))
         loss.backward()
         optimizer.step()
 
@@ -108,7 +105,3 @@ a = model(context_vector).data.numpy()
 print('Raw text: {}\n'.format(' '.join(raw_text)))
 print('Context: {}\n'.format(context))
 print('Prediction: {}'.format(get_max_prob_result(a[0], ix_to_word)))
-
-
-
-
